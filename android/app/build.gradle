@@ -1,0 +1,51 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'mg.pcg2005.app'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId "mg.pcg2005.app"
+        minSdk 24
+        targetSdk 34
+        versionCode 1
+        versionName "1.0"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+
+dependencies {
+    implementation 'androidx.webkit:webkit:1.11.0'
+}
+
+// Copie automatiquement l'application web (à la racine du dépôt) dans l'APK
+tasks.register('copyWebAssets', Copy) {
+    from(file("$rootDir/..")) {
+        include 'index.html', 'manifest.webmanifest', '*.png'
+    }
+    into file("$projectDir/src/main/assets/www")
+}
+// Icône de l'application : générée à partir de icon-192.png (racine du dépôt)
+tasks.register('copyLauncherIcon', Copy) {
+    from(file("$rootDir/../icon-192.png"))
+    into file("$projectDir/src/main/res/mipmap-xxxhdpi")
+    rename { 'ic_launcher.png' }
+}
+tasks.register('copyLauncherIconRound', Copy) {
+    from(file("$rootDir/../icon-192.png"))
+    into file("$projectDir/src/main/res/mipmap-xxxhdpi")
+    rename { 'ic_launcher_round.png' }
+}
+tasks.named('preBuild') { dependsOn 'copyWebAssets', 'copyLauncherIcon', 'copyLauncherIconRound' }
