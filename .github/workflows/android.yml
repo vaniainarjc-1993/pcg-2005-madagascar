@@ -1,0 +1,50 @@
+name: Construire l'application Android
+
+on:
+  push:
+    branches: [ main ]
+    tags: [ 'v*' ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Récupérer le code
+        uses: actions/checkout@v4
+
+      - name: Installer Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Installer le SDK Android
+        uses: android-actions/setup-android@v3
+
+      - name: Installer Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.7'
+
+      - name: Construire l'APK
+        working-directory: android
+        run: gradle assembleDebug --no-daemon
+
+      - name: Renommer l'APK
+        run: cp android/app/build/outputs/apk/debug/app-debug.apk PCG-2005-Madagascar.apk
+
+      - name: Mettre l'APK à disposition (onglet Actions)
+        uses: actions/upload-artifact@v4
+        with:
+          name: PCG-2005-Madagascar-apk
+          path: PCG-2005-Madagascar.apk
+
+      - name: Publier l'APK dans une Release (si tag v*)
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: PCG-2005-Madagascar.apk
